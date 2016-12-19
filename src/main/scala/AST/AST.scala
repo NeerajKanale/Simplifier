@@ -113,6 +113,19 @@ case class IfElseInstr(cond: Node, left: Node, right: Node) extends Node {
     }
 }
 
+case class IfElifInstr(cond: Node, left:Node, _elif: List[ElifInstr], _else: Node) extends Node{
+    override def toStr: String = {
+        var str  = "if" +cond.toStr + ":\n"
+        str += left.toStr.replaceAll("(?m)^", indent)
+        for(el <- _elif){
+            str += el.toStr
+        }
+        str += "\nelse:\n"
+        str += _else.toStr.replaceAll("(?m)^", indent)
+        str
+    }
+}
+
 case class WhileInstr(cond: Node, body: Node) extends Node {
     override def toStr = {
         "while " + cond.toStr + ":\n" + body.toStr.replaceAll("(?m)^", indent)
@@ -190,5 +203,14 @@ case class Tuple(list: List[Node]) extends Node {
                          else list.map(_.toStr).mkString("(", ",", ")")
 }
 
+case class ElifInstr(cond: Node, instr: Node) extends Node{
+    override def toStr = {
+        var str = "\nelif" + cond.toStr + ":\n"
+        str += instr.toStr.replaceAll("(?m)^", indent)
+        str
+    }
+}
 
+
+>>>>>>> gru18
         

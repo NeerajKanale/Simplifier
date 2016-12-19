@@ -1,14 +1,16 @@
-
 import scala.util.parsing.combinator._
 import scala.util.parsing.input.Positional
 import AST._
+
+import scala.collection.generic.SeqFactory
 
 class Parser extends JavaTokenParsers {
 
   val precedenceList: List[List[String]] = List( 
       List("is", ">=", "<=", "==", "!=", "<", ">"), // order matters also within inner list, longer op should go before shorter one, e.g. "<=" before "<", if one is a prefix of another
       List("+", "-"),
-      List("*", "/", "%")
+      List("*", "/", "%"),
+      List("**")
   )
 
   val minPrec = 0
@@ -37,7 +39,8 @@ class Parser extends JavaTokenParsers {
                                  "print\\b".r |
                                  "return\\b".r |
                                  "True\\b".r |
-                                 "while\\b".r
+                                 "while\\b".r |
+                                 "elif\\b".r
 
   val floatLiteral: Parser[Double] = """\d+(\.\d*)|\.\d+""".r ^^ { _.toDouble }
   
@@ -158,10 +161,10 @@ class Parser extends JavaTokenParsers {
       }
   }
 
-  def expr_list_comma: Parser[Node] = expr_list<~opt(",")
+  def expr_list_comma: Parser[Node] = expr_list<~ opt(",")
 
   //def expr_list: Parser[Node] = repsep(expression, ",") ^^ NodeList // repsep returns List[Node]
-  def expr_list: Parser[NodeList] = repsep(expression, ",") ^^ NodeList // repsep returns List[Node]
+  def expr_list: Parser[NodeList] = repsep(expression, ",") ^^ NodeList// repsep returns List[Node]
                                                            // equivalent to (NodeList(_))
                                                            // equivalent to { case expr_list => NodeList(expr_list) }
 
@@ -204,6 +207,7 @@ class Parser extends JavaTokenParsers {
       | return_instr
       | assignment
       | expression
+
   )
 
   def small_statement_list: Parser[List[Node]] = rep1sep(small_statement, ";")
@@ -223,13 +227,20 @@ class Parser extends JavaTokenParsers {
   def assignment: Parser[Assignment] = (target<~"=") ~ expression ^^ {
       case target ~ expression => Assignment(target, expression)
   }
+//  def elif_instr : Parser[Node] = {
+//    "elif"~> expression ~ (":" ~> suite) ^^ {
+//      case expression ~ suite => ElifInstr(expression, suite)
+//    }
+//  }
 
-  def if_else_stmt: Parser[Node] = (
-        "if" ~> expression ~ (":" ~> suite) ~ ("else"~":" ~> suite).? ^^ {
-            case expression ~ suite1 ~ Some(suite2) => IfElseInstr(expression, suite1, suite2)
-            case expression ~ suite ~ None => IfInstr(expression, suite)
-        }
-  )
+  def if_else_stmt: Parser[Node] = {
+    "if" ~> expression ~ (":" ~> suite) ~ ("elif" ~> expression ~ (":" ~> suite)).* ~ ("else" ~ ":" ~> suite).? ^^ {
+      case expression ~ suite3 ~ List(expression2 ~ suite4) ~ Some(suite5) => IfElifInstr(expression, suite3, List(ElifInstr(expression2, suite4)), suite5)
+      case expression ~ suite1 ~ Nil ~ Some(suite2) => IfElseInstr(expression, suite1, suite2)
+      case expression ~ suite ~ Nil ~ None => IfInstr(expression, suite)
+    }
+
+  }
 
   def while_stmt: Parser[WhileInstr] = "while" ~> expression ~ (":"~>suite) ^^ {
       case expression ~ suite => WhileInstr(expression, suite)
@@ -239,3 +250,4 @@ class Parser extends JavaTokenParsers {
 
 }
 
+>>>>>>> gru18

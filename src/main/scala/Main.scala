@@ -1,8 +1,8 @@
-
 import java.io.FileReader
 import java.io.FileNotFoundException
 import java.io.IOException
 
+import AST.TrueConst
 import simplifier.Simplifier
 
 object Main {
@@ -10,10 +10,10 @@ object Main {
   def main(args: Array[String]) {
 
       if(args.length == 0) {
-        println("Usage: sbt \"run filename ...\""); 
+        println("Usage: sbt \"run filename ...\"");
+        println(TrueConst() == TrueConst())
         return
       }
-
       val parser = new Parser()
 
       for (arg <- args) {
@@ -42,3 +42,4 @@ object Main {
       }
   }
 }
+
