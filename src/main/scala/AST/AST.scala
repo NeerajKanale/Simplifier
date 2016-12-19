@@ -210,7 +210,3 @@ case class ElifInstr(cond: Node, instr: Node) extends Node{
         str
     }
 }
-
-
->>>>>>> gru18
-        
