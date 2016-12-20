@@ -109,10 +109,29 @@ class Parser extends JavaTokenParsers {
   }
 
 
+
+
   def binary(level: Int): Parser[Node] = (
-      if (level>maxPrec) unary
+      if (level>maxPrec) binaryPowOp(minPrec)
       else chainl1( binary(level+1), binaryOp(level) ) // equivalent to binary(level+1) * binaryOp(level)
   )
+
+  def binaryPowOp(level: Int): Parser[Node] = {
+    if (level > 0) unary
+    else chainr1(binaryPowOp(level+1),
+      "**" ^^^ {
+      (a:Node, b:Node) => BinExpr("**", a, b)
+    },
+    (a: Node, b:Node) => if (b != null) BinExpr("**",a, b) else a, null)
+  }
+//def binaryRight(level: Int): Parser[Node] =
+//    if (level > 0) unary
+//    else chainr1(binaryRight(level + 1),
+//      "**" ^^^ {
+//        (a: Node, b: Node) => BinExpr("**", a, b)
+//      },
+//      (a: Node, b: Node) => if (b != null) BinExpr("**", a, b) else a,
+//      null)
 
   // operator precedence parsing takes place here
   def binaryOp(level: Int): Parser[((Node, Node) => BinExpr)] = {
@@ -134,7 +153,11 @@ class Parser extends JavaTokenParsers {
         lvalue
       | const
       | "("~>expression<~")"
-      | "["~>expr_list_comma<~"]" ^^ { 
+          | "("~>expr_list_comma<~")" ^^ {
+          case NodeList(x) => Tuple(x)
+          case t => {println("Warn: expr_list_comma didn't return NodeList"); t}
+        }
+      | "["~>expr_list_comma<~"]" ^^ {
           case NodeList(x) => ElemList(x)
           case l => { println("Warn: expr_list_comma didn't return NodeList"); l }
          }
