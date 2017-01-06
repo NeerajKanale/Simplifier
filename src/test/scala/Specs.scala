@@ -163,6 +163,7 @@ class parserSpec extends Specification {
 
     "remove dead assignments" in {
       parseString("x=a; x=b") mustEqual parseString("x=b")
+      parseString("x=a; x=x") mustEqual parseString("x=a")
     }
 
     "simplify if-else instruction with known condition" in {

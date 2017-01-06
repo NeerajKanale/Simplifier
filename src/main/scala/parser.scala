@@ -123,14 +123,7 @@ class Parser extends JavaTokenParsers {
     },
     (a: Node, b:Node) => if (b != null) BinExpr("**",a, b) else a, null)
   }
-//def binaryRight(level: Int): Parser[Node] =
-//    if (level > 0) unary
-//    else chainr1(binaryRight(level + 1),
-//      "**" ^^^ {
-//        (a: Node, b: Node) => BinExpr("**", a, b)
-//      },
-//      (a: Node, b: Node) => if (b != null) BinExpr("**", a, b) else a,
-//      null)
+
 
   // operator precedence parsing takes place here
   def binaryOp(level: Int): Parser[((Node, Node) => BinExpr)] = {
@@ -249,11 +242,7 @@ class Parser extends JavaTokenParsers {
   def assignment: Parser[Assignment] = (target<~"=") ~ expression ^^ {
       case target ~ expression => Assignment(target, expression)
   }
-//  def elif_instr : Parser[Node] = {
-//    "elif"~> expression ~ (":" ~> suite) ^^ {
-//      case expression ~ suite => ElifInstr(expression, suite)
-//    }
-//  }
+
 
   def if_else_stmt: Parser[Node] = {
     "if" ~> expression ~ (":" ~> suite) ~ ("elif" ~> expression ~ (":" ~> suite)).* ~ ("else" ~ ":" ~> suite).? ^^ {
