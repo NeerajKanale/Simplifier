@@ -211,3 +211,9 @@ case class ElifInstr(cond: Node, instr: Node) extends Node{
         str
     }
 }
+case class MultiargExpr(list: List[Node], op: String) extends Node {
+    override def toStr = list.map(_.toStr).mkString("",op,"")
+}
+case class EmptyNode() extends Node {
+    override def toStr = ""
+}

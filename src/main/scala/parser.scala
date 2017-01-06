@@ -1,8 +1,7 @@
-import scala.util.parsing.combinator._
-import scala.util.parsing.input.Positional
 import AST._
 
-import scala.collection.generic.SeqFactory
+import scala.util.parsing.combinator._
+
 
 class Parser extends JavaTokenParsers {
 
